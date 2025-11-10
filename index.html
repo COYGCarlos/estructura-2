@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Historia del Turismo</title>
+    <!-- Incluyendo Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuración personalizada para la fuente Inter */
+        html { font-family: 'Inter', sans-serif; }
+
+        /* Estilos específicos para la retroalimentación de las respuestas */
+        .option-correct {
+            background-color: #34D399; /* Tailwind green-400 */
+            border-color: #059669;    /* Tailwind green-600 */
+            color: #10B981;
+        }
+        .option-incorrect {
+            background-color: #F87171; /* Tailwind red-400 */
+            border-color: #D93333;    /* Tailwind red-600 */
+            color: #EF4444;
+        }
+        .option-base {
+            background-color: #F3F4F6; /* Tailwind gray-100 */
+            border-color: #D1D5DB;    /* Tailwind gray-300 */
+            color: #4B5563;
+        }
+        .option-base:hover:not(.disabled) {
+            background-color: #E5E7EB; /* Tailwind gray-200 on hover */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-start justify-center p-4 sm:p-8">
+
+    <div id="quiz-container" class="w-full max-w-2xl bg-white shadow-2xl rounded-xl p-6 sm:p-10 border-t-8 border-indigo-600">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">
+                Test de Historia del Turismo (U2)
+            </h1>
+            <p class="text-indigo-600 font-medium">10 preguntas de un banco de 80 ítems.</p>
+        </header>
+
+        <!-- Sección de Preguntas (Activa por defecto) -->
+        <div id="question-section">
+            <p class="text-lg font-semibold text-gray-700 mb-4">
+                Pregunta <span id="current-q-number">1</span> de 10
+            </p>
+
+            <!-- Título de la Pregunta -->
+            <p id="question-text" class="text-xl font-bold text-gray-800 mb-6 border-b pb-4">
+                [Texto de la pregunta]
+            </p>
+
+            <!-- Opciones de Respuesta -->
+            <div id="options-container" class="space-y-4 mb-6">
+                <!-- Las opciones se inyectan aquí -->
+            </div>
+
+            <!-- Razón de la Respuesta -->
+            <div id="rationale-box" class="p-4 rounded-lg hidden border-l-4" role="alert">
+                <p class="font-semibold mb-1 text-sm uppercase">Razón:</p>
+                <p id="rationale-text" class="text-gray-700 text-base"></p>
+            </div>
+
+            <!-- Botón de Siguiente/Finalizar -->
+            <div class="flex justify-end mt-6">
+                <button id="next-button" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 transition-colors hidden" onclick="nextQuestion()">
+                    Siguiente
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección de Resultados (Oculta por defecto) -->
+        <div id="results-section" class="hidden text-center p-8 bg-indigo-50 rounded-xl">
+            <h2 class="text-3xl font-extrabold text-indigo-700 mb-4">
+                ¡Test Finalizado!
+            </h2>
+            <div class="space-y-3 mb-6 text-lg font-medium">
+                <p class="text-gray-800">Aciertos: <span id="correct-count" class="text-green-600 font-bold">0</span></p>
+                <p class="text-gray-800">Errores: <span id="incorrect-count" class="text-red-600 font-bold">0</span></p>
+            </div>
+
+            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-inner">
+                <p class="text-xl font-semibold text-gray-700 mb-2">Nota Final (Puntuación Neta)</p>
+                <p id="final-score" class="text-5xl font-extrabold text-indigo-800">0.00</p>
+                <p class="text-sm text-gray-500 mt-2">
+                    Cálculo: Aciertos - (Errores &times; 1/3)
+                </p>
+            </div>
+
+            <button onclick="window.location.reload()" class="mt-8 px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 transition-colors">
+                Repetir Test
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ===============================================
+        // BANCO DE PREGUNTAS (80 preguntas centradas en el contenido)
+        // ===============================================
+
+        const fullQuestionBank = [
+            // Preguntas basadas en Antecedentes (2.1.1)
+            {
+                question: "¿Cuál fue el principal motivo de viaje en la Edad Antigua y la Baja Edad Media?",
+                options: ["Ocio y descanso", "Comercio", "Turismo termal y bienestar", "Estudio y educación"],
+                correctAnswer: "Comercio",
+                rationale: "El texto indica claramente que el comercio fue el motivo principal por el que el hombre ha viajado más a menudo en la Edad Antigua y Baja Edad Media."
+            },
+            {
+                question: "¿Qué famosa ruta de intercambio se menciona por unir Oriente con Occidente en la Edad Antigua y Baja Edad Media?",
+                options: ["Ruta de las Especias", "Ruta de la Seda", "Ruta del Ámbar", "Camino de Santiago"],
+                correctAnswer: "Ruta de la Seda",
+                rationale: "La Ruta de la Seda es citada como el ejemplo que ha unido Oriente con Occidente, destacando su importancia para el comercio de la época."
+            },
+            {
+                question: "Además del comercio, ¿cuáles son otras dos motivaciones importantes para viajar en la Edad Antigua y Baja Edad Media según el texto?",
+                options: ["Deporte y Gastronomía", "Peregrinaciones y Festividades", "Negocios y Estudios", "Termalismo y Playa"],
+                correctAnswer: "Peregrinaciones y Festividades",
+                rationale: "Las 'Peregrinaciones' (como Santiago de Compostela) y las 'Festividades' son mencionadas como motivaciones adicionales en esta época."
+            },
+            {
+                question: "¿Qué destino se menciona como ejemplo de peregrinación importante en la Baja Edad Media?",
+                options: ["La Meca", "Roma", "Santiago de Compostela", "Jerusalén"],
+                correctAnswer: "Santiago de Compostela",
+                rationale: "El texto lista las 'Peregrinaciones' como motivación y menciona explícitamente a Santiago de Compostela como un ejemplo."
+            },
+            {
+                question: "¿Qué actividad fue fundamental para el desarrollo del viaje organizado en la época de la Gran Bretaña del siglo XIX?",
+                options: ["El ferrocarril", "La invención del avión", "La creación de la ONU", "Los sistemas de reservas en línea"],
+                correctAnswer: "El ferrocarril",
+                rationale: "El desarrollo del ferrocarril fue clave para la aparición de las primeras agencias y el concepto de viaje organizado, precursor del turismo de masas."
+            },
+            {
+                question: "En la Edad Antigua, ¿qué motivación de viaje se relaciona con el asistir a grandes eventos religiosos o populares?",
+                options: ["Termalismo", "Comercio", "Festividades", "Burocracia"],
+                correctAnswer: "Festividades",
+                rationale: "Las 'Festividades' son mencionadas como una de las motivaciones para viajar en la Edad Antigua y Baja Edad Media."
+            },
+
+            // Preguntas basadas en El turismo hasta los años 50 (2.2) y de Masas (2.3)
+            {
+                question: "¿Qué fenómeno turístico se consolida y se hace popular a partir de los años 50?",
+                options: ["El Grand Tour", "El turismo de élite", "El turismo de masas y el viaje organizado", "El turismo termal"],
+                correctAnswer: "El turismo de masas y el viaje organizado",
+                rationale: "El punto 2.3 del temario se centra en 'El turismo de masas y el viaje organizado', señalando su auge tras los años 50 (2.2)."
+            },
+            {
+                question: "El concepto de 'viaje organizado' se refiere a la planificación y venta de viajes a un público más amplio. ¿Qué impulsó esto antes de los años 50?",
+                options: ["La popularización del coche privado", "Las innovaciones en el transporte colectivo", "La invención de internet", "La caída del Muro de Berlín"],
+                correctAnswer: "Las innovaciones en el transporte colectivo",
+                rationale: "La aparición y mejora de transportes como el tren y el barco a vapor antes de los 50 permitió organizar viajes para grupos."
+            },
+            {
+                question: "¿Cuál fue el principal cambio demográfico y social que favoreció el turismo de masas después de los años 50?",
+                options: ["El aumento de la edad media", "La reducción de la esperanza de vida", "El aumento de la renta disponible y el tiempo libre remunerado", "La disminución de la población mundial"],
+                correctAnswer: "El aumento de la renta disponible y el tiempo libre remunerado",
+                rationale: "El turismo de masas fue impulsado por la mejora económica en Occidente y la introducción de vacaciones pagadas y tiempo libre."
+            },
+            {
+                question: "El 'Grand Tour', que fue una actividad anterior al turismo de masas, se caracterizaba por ser un viaje de:",
+                options: ["Mochileros de bajo coste", "La élite (aristocracia) con fines educativos", "Turismo deportivo", "Viajes de negocios internacionales"],
+                correctAnswer: "La élite (aristocracia) con fines educativos",
+                rationale: "El Grand Tour era un rito de paso para los jóvenes aristócratas, combinando educación, cultura y estatus."
+            },
+            {
+                question: "Una de las características del turismo de masas (a partir de los 50) es que los destinos eran:",
+                options: ["Muy exclusivos y caros", "Homogéneos, estandarizados y accesibles", "Centrados únicamente en la cultura", "Limitados a un solo continente"],
+                correctAnswer: "Homogéneos, estandarizados y accesibles",
+                rationale: "El turismo de masas se basa en la estandarización de la oferta (paquetes turísticos) para hacerla accesible a grandes volúmenes de población."
+            },
+            {
+                question: "¿Qué efecto tuvo el turismo de masas en la sensibilidad al precio de los turistas?",
+                options: ["Aumentó la sensibilidad al precio", "Disminuyó la sensibilidad al precio", "No tuvo efecto", "Solo afectó al turismo de lujo"],
+                correctAnswer: "Aumentó la sensibilidad al precio",
+                rationale: "Al ser un turismo dirigido a grandes volúmenes, el precio se convirtió en un factor determinante para la toma de decisiones."
+            },
+
+            // Preguntas basadas en La era de internet (2.4)
+            {
+                question: "¿Qué desarrollo tecnológico se destaca como fundamental para la 'Era de Internet' en el turismo?",
+                options: ["El ferrocarril de alta velocidad", "Las tarjetas de crédito", "Los sistemas de reservas en línea (Online Booking)", "El GPS"],
+                correctAnswer: "Los sistemas de reservas en línea (Online Booking)",
+                rationale: "La 'Era de Internet' transformó la industria del turismo principalmente a través de la digitalización de la información y la venta directa, como las reservas en línea."
+            },
+            {
+                question: "La 'Era de Internet' provocó una reestructuración del poder en el sector turístico. ¿Qué actor ganó más relevancia con la venta directa?",
+                options: ["Los turoperadores tradicionales", "Las agencias de viajes minoristas", "Las aerolíneas y los alojamientos (venta directa)", "Los gobiernos locales"],
+                correctAnswer: "Las aerolíneas y los alojamientos (venta directa)",
+                rationale: "La digitalización permitió a las aerolíneas y hoteles vender directamente al cliente, restando poder a los intermediarios tradicionales."
+            },
+            {
+                question: "¿Qué capacidad proporciona Internet al consumidor en el proceso de compra de viajes?",
+                options: ["Menos opciones de pago", "Mayor dependencia de la agencia tradicional", "Acceso instantáneo a información y comparación de precios", "Vuelos más lentos"],
+                correctAnswer: "Acceso instantáneo a información y comparación de precios",
+                rationale: "Internet facilita la transparencia y la inmediatez en la búsqueda y comparación de productos turísticos."
+            },
+            {
+                question: "La aparición de los Global Distribution Systems (GDS) se relaciona con la era de internet. ¿Cuál era su función principal?",
+                options: ["Gestionar el equipaje", "Organizar excursiones locales", "Permitir a las agencias acceder y reservar tarifas aéreas y de alojamiento", "Diseñar folletos turísticos"],
+                correctAnswer: "Permitir a las agencias acceder y reservar tarifas aéreas y de alojamiento",
+                rationale: "Aunque existían antes, los GDS fueron fundamentales para digitalizar y centralizar la oferta de aerolíneas y hoteles, facilitando la venta online."
+            },
+            {
+                question: "Antes de la Era de Internet, la principal fuente de información turística eran los folletos y:",
+                options: ["Las reseñas de TikTok", "Las agencias de viajes físicas", "Los sistemas de reservas en línea", "Los blogs personales"],
+                correctAnswer: "Las agencias de viajes físicas",
+                rationale: "Las agencias físicas eran el punto central de información, reserva y compra antes de la digitalización masiva."
+            },
+
+            // Preguntas basadas en la Psicosociología (2.6, 2.7) y Pronóstico (2.5)
+            {
+                question: "¿Qué estudia el 'Concepto de motivación' en la psicosociología del turismo?",
+                options: ["El impacto económico de los viajes", "Las razones internas que impulsan al turista a elegir un destino y producto", "La geografía de los destinos", "La regulación legal del sector"],
+                correctAnswer: "Las razones internas que impulsan al turista a elegir un destino y producto",
+                rationale: "La motivación se centra en los factores psicológicos que mueven al individuo a viajar."
+            },
+            {
+                question: "¿Qué disciplina de la Unidad 2 se encarga de dividir a los turistas en grupos según sus deseos y características?",
+                options: ["Pronóstico turístico", "Política turística", "Segmentación turística", "Demanda turística"],
+                correctAnswer: "Segmentación turística",
+                rationale: "La segmentación turística (2.7) consiste en clasificar a los turistas para dirigir la oferta de manera más eficiente."
+            },
+            {
+                question: "¿Cuál es el objetivo principal del 'Pronóstico turístico' (2.5)?",
+                options: ["Analizar la historia de los viajes", "Estimar el futuro de la demanda y la oferta turística", "Estudiar la motivación de los viajeros", "Regular el sector a nivel legal"],
+                correctAnswer: "Estimar el futuro de la demanda y la oferta turística",
+                rationale: "El pronóstico se utiliza para predecir tendencias, volúmenes de turistas y necesidades futuras del sector."
+            },
+            {
+                question: "Las 'Teorías de la motivación' (2.6) buscan explicar principalmente:",
+                options: ["El funcionamiento de los aviones", "Por qué los turistas eligen viajar, cuándo y a dónde", "El costo de la vida en el destino", "Cómo se forman los precios de los hoteles"],
+                correctAnswer: "Por qué los turistas eligen viajar, cuándo y a dónde",
+                rationale: "Estas teorías se centran en el estudio de las necesidades y deseos del viajero."
+            },
+            {
+                question: "Al segmentar a los turistas, una de las variables clave es la 'psicográfica', que se relaciona con:",
+                options: ["La edad y el sexo", "La renta y el nivel educativo", "Los valores, intereses y estilos de vida", "La región geográfica de origen"],
+                correctAnswer: "Los valores, intereses y estilos de vida",
+                rationale: "La segmentación psicográfica se basa en las características internas y de estilo de vida del consumidor."
+            },
+
+            // Preguntas basadas en la Tipología de Turismo (Contenido)
+            {
+                question: "¿Cuál es el destino principal del 'Turismo de sol y playa'?",
+                options: ["Centros históricos", "Las costas y el buen clima", "El medio rural", "Balnearios especializados"],
+                correctAnswer: "Las costas y el buen clima",
+                rationale: "El texto indica que el destino principal del Turismo de sol y playa son 'las costas y el buen clima'."
+            },
+            {
+                question: "¿Qué actividad es fundamental en la finalidad del 'Turismo de sol y playa' además del descanso?",
+                options: ["Asistir a congresos", "Disfrutar del ocio nocturno y la restauración", "Practicar ecoturismo", "Realizar tratamientos de belleza"],
+                correctAnswer: "Disfrutar del ocio nocturno y la restauración",
+                rationale: "Finalidad: 'descansar disfrutar del ocio nocturno restauración, etc.'"
+            },
+            {
+                question: "¿Qué tipo de turismo tiene como finalidad principal 'Conocer la cultura de un destino'?",
+                options: ["Turismo deportivo", "Turismo gastronómico", "Turismo cultural", "Turismo de negocios"],
+                correctAnswer: "Turismo cultural",
+                rationale: "La finalidad del Turismo cultural es 'Conocer la cultura de un destino.'"
+            },
+            {
+                question: "El 'Turismo cultural' puede centrarse en un circuito por un país o región, o bien en:",
+                options: ["Un solo evento deportivo", "Una sola ciudad/pueblo", "Un balneario termal", "Una ruta comercial"],
+                correctAnswer: "Una sola ciudad/pueblo",
+                rationale: "El texto indica que el turismo cultural puede ser de 'una sola ciudad/pueblo o circuito por un país, región.'"
+            },
+            {
+                question: "¿Qué se incluye en la finalidad del 'Turismo de naturaleza'?",
+                options: ["Visitar grandes museos", "Realizar actividades en el medio rural e interpretación del medio", "Asistir a congresos", "Ocio nocturno"],
+                correctAnswer: "Realizar actividades en el medio rural e interpretación del medio",
+                rationale: "Incluye 'Realizar actividades en el medio rural (turismo rural), la interpretación del medio, actividades deportivas, etc.'"
+            },
+            {
+                question: "El 'Turismo gastronómico' tiene como motivo principal del viaje:",
+                options: ["La práctica de deportes acuáticos", "Conocer la gastronomía típica de una zona", "La visita a balnearios", "La asistencia a eventos masivos"],
+                correctAnswer: "Conocer la gastronomía típica de una zona",
+                rationale: "El Turismo gastronómico define su motivo principal como la inmersión y conocimiento de la cocina y productos típicos de una región."
+            },
+            {
+                question: "¿Qué incluye la finalidad del 'Turismo deportivo'?",
+                options: ["Realizar tratamientos termales", "Practicar algún deporte o participar en eventos no profesionales", "Visitar estadios antiguos", "Conocer la cultura local"],
+                correctAnswer: "Practicar algún deporte o participar en eventos no profesionales",
+                rationale: "Finalidad: 'practicar algún deporte o participar en eventos deportivos no profesionales.'"
+            },
+            {
+                question: "La intención del 'Turismo termal y bienestar' es realizar tratamientos de relajación y mejora de:",
+                options: ["Riqueza y estatus", "Salud o belleza", "Conocimiento histórico", "Habilidades deportivas"],
+                correctAnswer: "Salud o belleza",
+                rationale: "Intención de 'realizar tratamientos de relajación y mejora de salud o belleza. Se disfrutan en centros especializados.'"
+            },
+            {
+                question: "¿Dónde se disfrutan los tratamientos del 'Turismo termal y bienestar'?",
+                options: ["Hoteles de ciudad", "Resorts de playa", "Centros especializados", "Instalaciones deportivas"],
+                correctAnswer: "Centros especializados",
+                rationale: "El texto indica: 'Se disfrutan en centros especializados.'"
+            },
+            {
+                question: "¿Qué tipología se considera 'minoritaria' e incluye formatos como el turismo industrial, solidario, de juego o asistencia a festivales?",
+                options: ["Turismo de sol y playa", "Turismo cultural", "Otros", "Turismo de negocios"],
+                correctAnswer: "Otros",
+                rationale: "La tipología 'Otros' se describe como 'Tipología minoritario' e incluye esos formatos."
+            },
+
+            // Preguntas basadas en Turismo de Negocios (Contenido)
+            {
+                question: "¿Cómo es la sensibilidad al precio de la persona que viaja por negocios en comparación con otros turistas?",
+                options: ["Mucho más sensible", "Igualmente sensible", "Menos sensible", "Extremadamente sensible"],
+                correctAnswer: "Menos sensible",
+                rationale: "La persona que viaja por negocio es 'menos sensible al precio con respecto a otros turistas'."
+            },
+            {
+                question: "¿Cuál de los siguientes es un requisito de necesidad propia del turista de negocios, relacionado con la eficiencia del viaje?",
+                options: ["Un bajo precio de alojamiento", "Vuelos rápidos y sin conexiones", "Proximidad a la playa", "Acceso a espectáculos nocturnos"],
+                correctAnswer: "Vuelos rápidos y sin conexiones",
+                rationale: "El turista de negocios valora la eficiencia y la rapidez, por lo que los 'Vuelos rápidos y sin conexiones' son una de sus necesidades destacadas."
+            },
+            {
+                question: "¿Qué requisito se refiere a la flexibilidad en el viaje de negocios, considerando posibles imprevistos?",
+                options: ["Servicio de secretaría", "Buen servicio de habitaciones", "Tarifas que permitan cambios o anulación", "Buena conexión wifi"],
+                correctAnswer: "Tarifas que permitan cambios o anulación",
+                rationale: "Se destaca: 'Tarifas que permitan cambios o anulación' como necesidad propia de la finalidad del viaje."
+            },
+            {
+                question: "¿Qué servicio de comunicación es esencial para el turista de negocios para poder trabajar en el alojamiento?",
+                options: ["Teléfono público", "Buzón postal", "Buena conexión wifi", "Fax"],
+                correctAnswer: "Buena conexión wifi",
+                rationale: "Se destaca: 'Buena conexión wifi' como requisito fundamental."
+            },
+            {
+                question: "¿Qué servicio de hotel es mencionado como necesidad para el turista de negocios, relacionado con el cuidado de la ropa?",
+                options: ["Spa gratuito", "Animación infantil", "Servicio de lavandería y planchado", "Desayuno a la habitación"],
+                correctAnswer: "Servicio de lavandería y planchado",
+                rationale: "Se destaca: 'Servicio de lavandería y planchado' como requisito de necesidad propia."
+            },
+            {
+                question: "¿Qué servicio de apoyo personal en el hotel es fundamental para el turista de negocios?",
+                options: ["Servicio de chófer privado", "Servicio de niñera", "Servicio de secretaría", "Servicio de masajes"],
+                correctAnswer: "Servicio de secretaría",
+                rationale: "Se destaca: 'Servicio de secretaría' como requisito de apoyo."
+            },
+            {
+                question: "¿Qué servicio del hotel es importante para el turista de negocios para poder recibir asistencia o comidas en su habitación?",
+                options: ["Servicio de lavandería", "Buen servicio de habitaciones", "Buena conexión wifi", "Gimnasio"],
+                correctAnswer: "Buen servicio de habitaciones",
+                rationale: "Se destaca: 'Buen servicio de habitaciones' como requisito."
+            },
+            {
+                question: "Las necesidades del turista de negocios se centran en la eficacia, la comunicación y:",
+                options: ["El bajo coste", "La máxima duración del viaje", "El soporte profesional", "La cercanía a la playa"],
+                correctAnswer: "El soporte profesional",
+                rationale: "Los requisitos como servicio de secretaría y lavandería se enmarcan en la necesidad de soporte profesional."
+            },
+
+            // Preguntas adicionales de contenido profundo y correlación
+            {
+                question: "¿Qué tipo de turismo se caracteriza por la interpretación del medio y actividades deportivas en el medio rural?",
+                options: ["Cultural", "De sol y playa", "De naturaleza", "Gastronómico"],
+                correctAnswer: "De naturaleza",
+                rationale: "El turismo de naturaleza incluye 'la interpretación del medio, actividades deportivas, etc.'"
+            },
+            {
+                question: "El término 'turismo rural' se incluye dentro de la clasificación de:",
+                options: ["Turismo de negocios", "Turismo cultural", "Turismo de naturaleza", "Turismo termal"],
+                correctAnswer: "Turismo de naturaleza",
+                rationale: "El texto especifica que el turismo de naturaleza incluye 'Realizar actividades en el medio rural (turismo rural)'."
+            },
+            {
+                question: "¿Qué tipología de turismo tiene como finalidad 'practicar algún deporte o participar en eventos deportivos no profesionales'?",
+                options: ["Turismo de juego", "Turismo deportivo", "Turismo cultural", "Turismo de naturaleza"],
+                correctAnswer: "Turismo deportivo",
+                rationale: "Es la finalidad del Turismo deportivo."
+            },
+            {
+                question: "El ocio nocturno y la restauración son componentes de la finalidad de qué tipo de turismo:",
+                options: ["Turismo de negocios", "Turismo de sol y playa", "Turismo solidario", "Turismo termal"],
+                correctAnswer: "Turismo de sol y playa",
+                rationale: "Finalidad: 'descansar disfrutar del ocio nocturno restauración, etc.'"
+            },
+            {
+                question: "La visita a lugares históricos como las pirámides es un ejemplo de motivación relacionada con:",
+                options: ["El comercio", "El turismo de naturaleza", "El turismo cultural", "El turismo de negocios"],
+                correctAnswer: "El turismo cultural",
+                rationale: "Las visitas a monumentos históricos se enmarcan en el objetivo de conocer la cultura del destino."
+            },
+            {
+                question: "¿Qué aspecto de la psicosociología del turismo está íntimamente ligado a la 'intención de compra' del turista?",
+                options: ["La segmentación turística", "El pronóstico turístico", "Las tarifas aéreas", "El servicio de habitaciones"],
+                correctAnswer: "La segmentación turística",
+                rationale: "La segmentación (2.7) se realiza precisamente para entender y agrupar la demanda (intención de compra) y dirigir la oferta."
+            },
+            {
+                question: "Los sistemas de reservas en línea (Online Booking) son un hito de qué etapa histórica del turismo?",
+                options: ["Edad Antigua", "Baja Edad Media", "El turismo de masas", "La era de internet"],
+                correctAnswer: "La era de internet",
+                rationale: "Los sistemas de reservas en línea son el pilar de la 'Era de Internet' (2.4)."
+            },
+            {
+                question: "Antes del turismo de masas, la aristocracia realizaba el Grand Tour con fines de:",
+                options: ["Comercio", "Educación y cultura", "Termalismo", "Deporte no profesional"],
+                correctAnswer: "Educación y cultura",
+                rationale: "El Grand Tour era un viaje educativo y de formación cultural para la élite."
+            },
+            {
+                question: "El turismo de masas se consolidó gracias al desarrollo de:",
+                options: ["Los viajes personalizados", "El transporte individual", "El viaje organizado y estandarizado", "El turismo de juego"],
+                correctAnswer: "El viaje organizado y estandarizado",
+                rationale: "El punto 2.3 trata sobre 'El turismo de masas y el viaje organizado'."
+            },
+            {
+                question: "Si un turista de negocios tiene una baja sensibilidad al precio, ¿en qué se enfocará su decisión de compra de vuelo?",
+                options: ["El precio más bajo", "La rapidez y la ausencia de conexiones", "El lujo del asiento", "El ocio durante el vuelo"],
+                correctAnswer: "La rapidez y la ausencia de conexiones",
+                rationale: "Su prioridad es la eficiencia y el tiempo: 'Vuelos rápidos y sin conexiones' es un requisito destacado."
+            },
+            {
+                question: "¿Qué tipo de turismo minoritario se relaciona con la visita a fábricas, minas o infraestructuras industriales?",
+                options: ["Turismo solidario", "Turismo de juego", "Turismo industrial", "Turismo gastronómico"],
+                correctAnswer: "Turismo industrial",
+                rationale: "El texto lo menciona como uno de los formatos que se puede incluir en la tipología minoritaria ('Otros')."
+            },
+            {
+                question: "¿Qué tipo de turismo minoritario está asociado a la participación en causas benéficas o apoyo a comunidades?",
+                options: ["Turismo termal", "Turismo deportivo", "Turismo solidario", "Turismo de masas"],
+                correctAnswer: "Turismo solidario",
+                rationale: "El 'turismo solidario' es un ejemplo de tipología minoritaria ('Otros')."
+            },
+            {
+                question: "Si la finalidad de un viaje es mejorar la salud o la belleza, ¿de qué tipología de turismo estamos hablando?",
+                options: ["Deportivo", "De negocios", "Termal y bienestar", "Cultural"],
+                correctAnswer: "Termal y bienestar",
+                rationale: "La intención es 'realizar tratamientos de relajación y mejora de salud o belleza.'"
+            },
+            {
+                question: "En la Era de Internet, ¿qué elemento clave permite la compra directa por parte del consumidor?",
+                options: ["Las agencias de viajes físicas", "Los sistemas de reservas en línea", "Los sistemas de trenes", "Los folletos impresos"],
+                correctAnswer: "Los sistemas de reservas en línea",
+                rationale: "Los sistemas de reservas en línea son el medio que permite la transacción directa en la web."
+            },
+            {
+                question: "¿Cuál de estos servicios de hotel es una necesidad clave para el viajero de negocios y no tanto para el de ocio?",
+                options: ["Desayuno gratuito", "Piscina", "Servicio de secretaría", "Gimnasio"],
+                correctAnswer: "Servicio de secretaría",
+                rationale: "El servicio de secretaría es un requisito de soporte profesional específico para el turista de negocios."
+            },
+            {
+                question: "El concepto de 'Turismo de masas' implica un alto volumen de viajeros con un perfil de:",
+                options: ["Baja estandarización", "Alto gasto", "Bajo o medio gasto y paquetes estandarizados", "Exclusividad"],
+                correctAnswer: "Bajo o medio gasto y paquetes estandarizados",
+                rationale: "El turismo de masas (2.3) se caracteriza por ser accesible y estandarizado para la clase media."
+            },
+            {
+                question: "El comercio en la Edad Antigua se vio facilitado por:",
+                options: ["La invención del automóvil", "Las rutas terrestres como la Ruta de la Seda", "Los sistemas de reservas en línea", "La creación del avión"],
+                correctAnswer: "Las rutas terrestres como la Ruta de la Seda",
+                rationale: "La Ruta de la Seda es el ejemplo clave de cómo el comercio impulsó los viajes en esa época."
+            },
+            {
+                question: "La segmentación turística busca agrupar a los turistas en función de:",
+                options: ["La antigüedad del destino", "La similitud de sus características, deseos y motivaciones", "La cantidad de hoteles", "El pronóstico del tiempo"],
+                correctAnswer: "La similitud de sus características, deseos y motivaciones",
+                rationale: "Segmentar es dividir un mercado en grupos con necesidades y deseos homogéneos."
+            },
+            {
+                question: "Si la finalidad del viaje es 'Conocer la gastronomía típica de una zona', ¿qué tipología de turismo se está realizando?",
+                options: ["Cultural", "Gastronómico", "Deportivo", "De naturaleza"],
+                correctAnswer: "Gastronómico",
+                rationale: "El motivo principal del Turismo gastronómico es conocer la gastronomía típica de una zona."
+            },
+            {
+                question: "En el turismo de negocios, la necesidad de 'Tarifas que permitan cambios o anulación' se debe a:",
+                options: ["La baja sensibilidad al precio", "Los frecuentes cambios en la agenda profesional", "El deseo de ocio", "La necesidad de lavandería"],
+                correctAnswer: "Los frecuentes cambios en la agenda profesional",
+                rationale: "La flexibilidad es crucial debido a la naturaleza impredecible de las agendas de negocios."
+            },
+            {
+                question: "¿Qué tipología de turismo incluye actividades como el 'turismo de juego'?",
+                options: ["Turismo cultural", "Turismo deportivo", "Otros (Tipología minoritaria)", "Turismo de negocios"],
+                correctAnswer: "Otros (Tipología minoritaria)",
+                rationale: "El turismo de juego es un formato incluido en la tipología minoritaria 'Otros'."
+            },
+            {
+                question: "¿Qué característica de la oferta es típica del turismo de sol y playa?",
+                options: ["Proximidad a museos", "Proximidad a centros de convenciones", "Ubicación en costas con buen clima", "Servicios de secretaría"],
+                correctAnswer: "Ubicación en costas con buen clima",
+                rationale: "Destino principal 'las costas y el buen clima'."
+            },
+            {
+                question: "El 'Turismo termal y bienestar' busca tratamientos de relajación y mejora de salud o belleza en:",
+                options: ["Hoteles con piscina", "Centros especializados", "Gimnasios", "Agencias de viajes"],
+                correctAnswer: "Centros especializados",
+                rationale: "El texto indica: 'Se disfrutan en centros especializados.'"
+            },
+            {
+                question: "El Grand Tour (siglos XVII-XVIII) fue un precursor del turismo moderno, pero se diferenciaba del turismo de masas en su:",
+                options: ["Motivación (era solo ocio)", "Clase social (era solo élite)", "Duración (era muy corto)", "Medio de transporte (era aéreo)"],
+                correctAnswer: "Clase social (era solo élite)",
+                rationale: "El Grand Tour estaba reservado a la nobleza, mientras que el turismo de masas es para la clase media."
+            },
+            {
+                question: "Si la finalidad de un viaje es la 'interpretación del medio', se clasifica como:",
+                options: ["Turismo cultural", "Turismo gastronómico", "Turismo de naturaleza", "Turismo de negocios"],
+                correctAnswer: "Turismo de naturaleza",
+                rationale: "El turismo de naturaleza incluye 'la interpretación del medio'."
+            },
+            {
+                question: "El turismo que puede ser de 'una sola ciudad/pueblo o circuito por un país, región' es el:",
+                options: ["Turismo de sol y playa", "Turismo cultural", "Turismo de negocios", "Turismo deportivo"],
+                correctAnswer: "Turismo cultural",
+                rationale: "El texto describe así la realización del turismo cultural."
+            },
+            {
+                question: "El requisito de 'Buena conexión wifi' para el turista de negocios es vital para:",
+                options: ["El ocio nocturno", "Mantener la comunicación profesional y el trabajo a distancia", "El servicio de lavandería", "Vuelos rápidos"],
+                correctAnswer: "Mantener la comunicación profesional y el trabajo a distancia",
+                rationale: "Es una necesidad clave para el trabajo y la comunicación."
+            },
+            {
+                question: "La Baja Edad Media tuvo como motivación de viaje, además del comercio, las:",
+                options: ["Tarifas flexibles", "Peregrinaciones", "Reservas online", "Conexiones wifi"],
+                correctAnswer: "Peregrinaciones",
+                rationale: "Las peregrinaciones (ej. Santiago de Compostela) fueron una motivación importante en esa época."
+            },
+            {
+                question: "¿Qué fenómeno, posterior a los años 50, se caracteriza por un gran volumen de viajes a precios accesibles?",
+                options: ["El Grand Tour", "El turismo de masas", "El turismo termal", "La Ruta de la Seda"],
+                correctAnswer: "El turismo de masas",
+                rationale: "El turismo de masas (2.3) se consolida con el aumento de la renta disponible y la estandarización del viaje."
+            },
+            {
+                question: "En la Era de Internet, ¿qué se hizo 'fundamental' en la compra y venta de viajes?",
+                options: ["Los folletos impresos", "El boca a boca", "Los sistemas de reservas en línea (Online Booking)", "El Grand Tour"],
+                correctAnswer: "Los sistemas de reservas en línea (Online Booking)",
+                rationale: "Los sistemas de reservas en línea se volvieron el pilar de la venta directa."
+            },
+            {
+                question: "El 'Turismo de sol y playa' tiene como objetivo el descanso y el disfrute, mientras que el 'Turismo de negocios' busca:",
+                options: ["La máxima duración del viaje", "La eficiencia y el soporte profesional", "Las festividades locales", "La interpretación del medio"],
+                correctAnswer: "La eficiencia y el soporte profesional",
+                rationale: "Los requisitos del turista de negocios se centran en la eficacia del trabajo y el soporte (secretaría, wifi)."
+            },
+            {
+                question: "¿Qué tipo de turismo está asociado con 'realizar tratamientos de relajación'?",
+                options: ["Deportivo", "Cultural", "Termal y bienestar", "Gastronómico"],
+                correctAnswer: "Termal y bienestar",
+                rationale: "La intención es 'realizar tratamientos de relajación y mejora de salud o belleza.'"
+            },
+            {
+                question: "Si un turista de negocios tiene una baja sensibilidad al precio, ¿qué implica esto para el sector hotelero?",
+                options: ["Que solo buscará ofertas", "Que priorizará la calidad y los servicios sobre el coste", "Que viajará solo en temporada baja", "Que su viaje es de ocio"],
+                correctAnswer: "Que priorizará la calidad y los servicios sobre el coste",
+                rationale: "Al ser menos sensible al precio, su foco está en que se cumplan sus requisitos de calidad y eficiencia (vuelos rápidos, secretaría, wifi)."
+            },
+            {
+                question: "Las 'actividades deportivas' pueden ser la finalidad principal de un viaje. ¿A qué tipología corresponde?",
+                options: ["Turismo de naturaleza", "Turismo deportivo", "Turismo cultural", "Otros"],
+                correctAnswer: "Turismo deportivo",
+                rationale: "Finalidad: 'practicar algún deporte o participar en eventos deportivos no profesionales.'"
+            },
+            {
+                question: "La 'interpretación del medio' y las actividades en el 'medio rural' son parte del:",
+                options: ["Turismo cultural", "Turismo gastronómico", "Turismo de naturaleza", "Turismo termal"],
+                correctAnswer: "Turismo de naturaleza",
+                rationale: "Es parte de la definición del Turismo de naturaleza."
+            },
+            {
+                question: "El servicio de 'lavandería y planchado' es un requisito del turista de negocios para:",
+                options: ["Ahorrar dinero", "Mantener la imagen profesional", "Aumentar el ocio", "Facilitar el pronóstico turístico"],
+                correctAnswer: "Mantener la imagen profesional",
+                rationale: "Es un requisito de necesidad propia, clave para un profesional en viaje."
+            },
+            {
+                question: "El turismo de negocios requiere de 'Vuelos rápidos y sin conexiones' debido a que:",
+                options: ["El turista es menos sensible al precio", "El tiempo es un recurso escaso en este tipo de viaje", "El ocio es la prioridad", "Es una obligación legal"],
+                correctAnswer: "El tiempo es un recurso escaso en este tipo de viaje",
+                rationale: "La eficiencia y la rapidez son esenciales para el cumplimiento de la finalidad del viaje de negocios."
+            },
+            {
+                question: "¿Qué concepto se relaciona con la predicción de volúmenes futuros de turistas y tendencias?",
+                options: ["Segmentación turística", "Psicosociología del turismo", "Pronóstico turístico", "Ruta de la Seda"],
+                correctAnswer: "Pronóstico turístico",
+                rationale: "El Pronóstico turístico (2.5) es la estimación del futuro del sector."
+            },
+            {
+                question: "El motivo 'Comercio' en la Edad Antigua se ejemplifica con:",
+                options: ["Las peregrinaciones a Santiago", "La Ruta de la Seda", "El turismo de masas", "El Grand Tour"],
+                correctAnswer: "La Ruta de la Seda",
+                rationale: "La Ruta de la Seda es el ejemplo que ha unido Oriente con Occidente por motivos comerciales."
+            },
+            {
+                question: "¿Qué tipología minoritaria se asocia a la 'asistencia a festivales'?",
+                options: ["Turismo de juego", "Turismo industrial", "Otros", "Turismo deportivo"],
+                correctAnswer: "Otros",
+                rationale: "El texto incluye 'asistencia a festivales' en la tipología minoritaria 'Otros'."
+            },
+            {
+                question: "El 'Buen servicio de habitaciones' es un requisito de:",
+                options: ["Turismo cultural", "Turismo de sol y playa", "Turismo de negocios", "Turismo gastronómico"],
+                correctAnswer: "Turismo de negocios",
+                rationale: "Es un requisito destacado para el turista de negocios."
+            },
+            {
+                question: "Las 'Tarifas que permitan cambios o anulación' son cruciales en el turismo de negocios para manejar la:",
+                options: ["Planificación cultural", "Flexibilidad", "Baja sensibilidad al precio", "Ruta de la Seda"],
+                correctAnswer: "Flexibilidad",
+                rationale: "Permiten adaptarse a la flexibilidad necesaria en las agendas profesionales."
+            },
+            {
+                question: "¿A qué se debe el auge del 'turismo de masas' después de los años 50?",
+                options: ["A la Segunda Guerra Mundial", "Al aumento de la renta y el tiempo libre", "A la invención del Grand Tour", "A la aparición de internet"],
+                correctAnswer: "Al aumento de la renta y el tiempo libre",
+                rationale: "El aumento de la capacidad económica y el tiempo libre (vacaciones pagadas) fueron los motores del turismo de masas."
+            },
+            {
+                question: "El 'Turismo gastronómico' se diferencia del cultural en que su motivo principal es:",
+                options: ["Conocer la historia", "Conocer la comida típica de la zona", "Realizar deporte", "Asistir a festivales"],
+                correctAnswer: "Conocer la comida típica de la zona",
+                rationale: "Motivo principal: 'conocer la gastronomía típica de una zona.'"
+            },
+            {
+                question: "¿Qué tipo de turismo busca 'descansar y disfrutar del ocio nocturno'?",
+                options: ["Turismo cultural", "Turismo de sol y playa", "Turismo de negocios", "Turismo de naturaleza"],
+                correctAnswer: "Turismo de sol y playa",
+                rationale: "Es parte de la finalidad del Turismo de sol y playa."
+            },
+            {
+                question: "En la Era de Internet, el cliente ganó poder al tener acceso a:",
+                options: ["Vuelos más lentos", "Menos opciones de hotel", "Información y comparación instantánea", "El servicio de secretaría"],
+                correctAnswer: "Información y comparación instantánea",
+                rationale: "Internet facilita la transparencia y la inmediatez en la búsqueda de información."
+            },
+            {
+                question: "¿Cuál es una de las motivaciones para viajar en la Edad Antigua y Baja Edad Media, además del comercio?",
+                options: ["Turismo de juego", "Turismo solidario", "Peregrinaciones", "Turismo industrial"],
+                correctAnswer: "Peregrinaciones",
+                rationale: "Las peregrinaciones y festividades son las otras motivaciones destacadas."
+            },
+            {
+                question: "El 'Turismo cultural' tiene como finalidad principal 'Conocer la cultura de un destino', lo que incluye:",
+                options: ["Solo la gastronomía", "Monumentos y tradiciones", "Solo el ocio nocturno", "Solo el medio rural"],
+                correctAnswer: "Monumentos y tradiciones",
+                rationale: "El turismo cultural se enfoca en la inmersión en la cultura, incluyendo historia, monumentos, y tradiciones."
+            },
+            {
+                question: "El servicio de 'secretaría' es un requisito de necesidad propia del turismo de negocios. ¿Qué necesidad principal cubre?",
+                options: ["Ocio", "Transporte", "Soporte administrativo y agenda", "Descanso"],
+                correctAnswer: "Soporte administrativo y agenda",
+                rationale: "Cubre las necesidades de apoyo personal y gestión de la agenda profesional."
+            },
+            {
+                question: "¿Qué tipología de turismo tiene como destino principal las costas y el buen clima?",
+                options: ["Turismo de negocios", "Turismo de naturaleza", "Turismo de sol y playa", "Turismo termal"],
+                correctAnswer: "Turismo de sol y playa",
+                rationale: "Destino principal 'las costas y el buen clima'."
+            },
+            {
+                question: "El 'Turismo de naturaleza' incluye, además del turismo rural, actividades de interpretación del medio y:",
+                options: ["Negocios", "Deportivas", "Gastronómicas", "Ocio nocturno"],
+                correctAnswer: "Deportivas",
+                rationale: "Incluye 'actividades deportivas, etc.'"
+            },
+            {
+                question: "Si la intención es realizar tratamientos de relajación y mejora de belleza, el destino más adecuado es:",
+                options: ["Una gran ciudad", "Un centro especializado", "Una zona de montaña", "Una costa con buen clima"],
+                correctAnswer: "Un centro especializado",
+                rationale: "El texto indica que el turismo termal y bienestar 'Se disfrutan en centros especializados.'"
+            },
+            {
+                question: "El turismo de negocios se distingue del ocio en que la persona viajera es:",
+                options: ["Más sensible al precio", "Menos sensible al precio", "Totalmente insensible al precio", "Solo sensible al precio del ocio"],
+                correctAnswer: "Menos sensible al precio",
+                rationale: "La persona que viaja por necio es 'menos sensible al precio con respecto a otros turistas'."
+            },
+            {
+                question: "El desarrollo de los sistemas de reservas en línea fue facilitado por:",
+                options: ["El Grand Tour", "La Era de Internet", "La Baja Edad Media", "El turismo de masas"],
+                correctAnswer: "La Era de Internet",
+                rationale: "Los sistemas de reservas en línea son el cambio clave de la Era de Internet (2.4)."
+            },
+            {
+                question: "El 'Turismo cultural' tiene la versatilidad de poder enfocarse en 'una sola ciudad/pueblo' o en un:",
+                options: ["Hotel de negocios", "Circuito por un país o región", "Balneario termal", "Campo de deportes"],
+                correctAnswer: "Circuito por un país o región",
+                rationale: "Puede tratarse de 'una sola ciudad/pueblo o circuito por un país, región.'"
+            },
+            {
+                question: "¿Cuál de estos NO es un requisito propio del turista de negocios?",
+                options: ["Vuelos rápidos y sin conexiones", "Tarifas con posibilidad de anulación", "Baja sensibilidad a la calidad", "Buena conexión wifi"],
+                correctAnswer: "Baja sensibilidad a la calidad",
+                rationale: "El turista de negocios requiere alta calidad y soporte profesional, por lo que su sensibilidad a la calidad es alta."
+            },
+            {
+                question: "La 'Ruta de la Seda' en la Edad Antigua fue un ejemplo de viaje motivado por:",
+                options: ["El turismo deportivo", "El turismo cultural", "El comercio", "El ocio nocturno"],
+                correctAnswer: "El comercio",
+                rationale: "La Ruta de la Seda es el ejemplo clave de viajes impulsados por el comercio."
+            },
+            {
+                question: "El concepto de 'Turismo de masas' se caracteriza por el alto volumen de turistas y la:",
+                options: ["Exclusividad de los destinos", "Estandarización del producto turístico", "Alta sensibilidad a la calidad", "Baja sensibilidad al precio"],
+                correctAnswer: "Estandarización del producto turístico",
+                rationale: "El viaje organizado y estandarizado fue la clave para la accesibilidad masiva."
+            },
+            {
+                question: "El 'Pronóstico turístico' es una herramienta clave para:",
+                options: ["La segmentación turística", "La toma de decisiones y planificación de inversiones", "El servicio de lavandería", "La Ruta de la Seda"],
+                correctAnswer: "La toma de decisiones y planificación de inversiones",
+                rationale: "Al estimar el futuro, el pronóstico es vital para la planificación del sector."
+            },
+            {
+                question: "¿Qué tipología de turismo se enfoca en conocer la gastronomía típica de una zona?",
+                options: ["De naturaleza", "Gastronómico", "De negocios", "Deportivo"],
+                correctAnswer: "Gastronómico",
+                rationale: "El motivo principal es conocer la gastronomía típica de una zona."
+            },
+            {
+                question: "El turismo de masas fue un fenómeno social posterior a la Segunda Guerra Mundial, consolidándose a partir de:",
+                options: ["El Grand Tour", "Los años 50", "La Baja Edad Media", "La invención del comercio"],
+                correctAnswer: "Los años 50",
+                rationale: "El punto 2.3 ('El turismo de masas...') se sitúa en la estructura después de 'El turismo hasta los años 50' (2.2)."
+            },
+            {
+                question: "La motivación de 'Peregrinaciones' en la Baja Edad Media está relacionada con la búsqueda de:",
+                options: ["Comercio", "Fe y devoción", "Tratamientos termales", "Ocio nocturno"],
+                correctAnswer: "Fe y devoción",
+                rationale: "Las peregrinaciones son viajes con un fuerte componente religioso y espiritual."
+            },
+            {
+                question: "El requisito de 'Servicio de secretaría' en el turismo de negocios es una necesidad de:",
+                options: ["Lujo", "Ocio", "Soporte profesional", "Turismo cultural"],
+                correctAnswer: "Soporte profesional",
+                rationale: "Cubre las necesidades de apoyo administrativo y de gestión."
+            },
+            {
+                question: "¿Qué tipología de turismo incluye actividades como el turismo solidario y el industrial?",
+                options: ["Turismo cultural", "Turismo de naturaleza", "Turismo minoritario (Otros)", "Turismo de negocios"],
+                correctAnswer: "Turismo minoritario (Otros)",
+                rationale: "Ambos se incluyen en la 'Tipología minoritario' ('Otros')."
+            },
+            {
+                question: "El 'Turismo de sol y playa' se enfoca en el descanso y el ocio. ¿Qué tipología se enfoca en la salud y la belleza?",
+                options: ["Turismo cultural", "Turismo deportivo", "Turismo termal y bienestar", "Turismo de naturaleza"],
+                correctAnswer: "Turismo termal y bienestar",
+                rationale: "Busca 'tratamientos de relajación y mejora de salud o belleza.'"
+            },
+            {
+                question: "El concepto de 'motivación' en la psicosociología del turismo está ligado al estudio de:",
+                options: ["El coste del viaje", "Las razones internas del viajero", "El volumen de reservas", "Las tarifas de avión"],
+                correctAnswer: "Las razones internas del viajero",
+                rationale: "La motivación busca entender las razones internas (psicológicas) que mueven al turista."
+            },
+            {
+                question: "¿El 'Turismo de naturaleza' incluye actividades de 'turismo rural' y 'actividades deportivas'. ¿Qué más incluye?",
+                options: ["El comercio", "La interpretación del medio", "El ocio nocturno", "El Grand Tour"],
+                correctAnswer: "La interpretación del medio",
+                rationale: "Incluye 'la interpretación del medio'."
+            },
+            {
+                question: "La 'Era de Internet' provocó un cambio en la distribución turística. ¿Qué medio de venta ganó importancia?",
+                options: ["Agencias de viajes físicas", "Venta directa por parte de los proveedores", "El correo postal", "Los turoperadores tradicionales"],
+                correctAnswer: "Venta directa por parte de los proveedores",
+                rationale: "Internet facilitó la venta directa de hoteles y aerolíneas a través de sus propios canales online."
+            },
+            {
+                question: "¿Qué tipología de turismo puede realizarse como 'circuito por un país' o enfocado en 'una sola ciudad/pueblo'?",
+                options: ["Turismo deportivo", "Turismo gastronómico", "Turismo cultural", "Turismo de sol y playa"],
+                correctAnswer: "Turismo cultural",
+                rationale: "El texto indica esta versatilidad en la realización del turismo cultural."
+            },
+            {
+                question: "La segmentación turística (2.7) tiene como objetivo principal:",
+                options: ["Predecir el futuro", "Definir grupos de turistas con necesidades similares", "Organizar vuelos rápidos", "Estudiar la Ruta de la Seda"],
+                correctAnswer: "Definir grupos de turistas con necesidades similares",
+                rationale: "Segmentar es dividir el mercado en grupos homogéneos para una oferta más dirigida."
+            },
+            {
+                question: "El requisito de 'Servicio de lavandería y planchado' para el turista de negocios se considera una:",
+                options: ["Actividad de ocio", "Necesidad propia de la finalidad del viaje", "Promoción turística", "Motivación cultural"],
+                correctAnswer: "Necesidad propia de la finalidad del viaje",
+                rationale: "Es un requisito de necesidad propia, clave para el mantenimiento de la imagen profesional."
+            },
+            {
+                question: "El 'Turismo de masas' posterior a los años 50 hizo que los viajes fueran accesibles a la:",
+                options: ["Aristocracia", "Clase alta", "Clase media", "Clase baja"],
+                correctAnswer: "Clase media",
+                rationale: "El aumento de la renta y el tiempo libre hizo del turismo una actividad de masas, accesible a la clase media."
+            },
+            {
+                question: "La baja sensibilidad al precio en el turismo de negocios implica que el viajero está dispuesto a pagar más por:",
+                options: ["Vuelos más largos", "Un mejor servicio y eficiencia", "Una baja conexión wifi", "Tarifas inamovibles"],
+                correctAnswer: "Un mejor servicio y eficiencia",
+                rationale: "Prioriza la eficiencia (vuelos rápidos) y el soporte (secretaría) sobre el coste."
+            },
+            {
+                question: "Los sistemas de reservas en línea (Online Booking) permitieron que los hoteles pudieran:",
+                options: ["Hacer el Grand Tour", "Vender directamente sin intermediarios", "Aumentar su sensibilidad al precio", "Eliminar el servicio de habitaciones"],
+                correctAnswer: "Vender directamente sin intermediarios",
+                rationale: "La venta directa es el cambio clave provocado por la Era de Internet."
+            },
+            {
+                question: "El turismo de sol y playa tiene una finalidad de descanso, mientras que el turismo cultural tiene una finalidad de:",
+                options: ["Ocio nocturno", "Practicar deporte", "Conocimiento y cultura", "Tratamientos de salud"],
+                correctAnswer: "Conocimiento y cultura",
+                rationale: "Finalidad: 'Conocer la cultura de un destino.'"
+            },
+            {
+                question: "El motivo principal de viaje en la Edad Antigua se diferencia de las peregrinaciones en que era de índole:",
+                options: ["Religiosa", "Comercial", "Deportiva", "Termal"],
+                correctAnswer: "Comercial",
+                rationale: "El principal motivo era el comercio, mientras que las peregrinaciones eran por fe y devoción."
+            },
+            {
+                question: "¿Qué necesidad propia del turista de negocios requiere de flexibilidad en la reserva de transporte?",
+                options: ["Buena conexión wifi", "Servicio de secretaría", "Tarifas que permitan cambios o anulación", "Servicio de habitaciones"],
+                correctAnswer: "Tarifas que permitan cambios o anulación",
+                rationale: "La flexibilidad es crucial por los cambios de agenda."
+            },
+            {
+                question: "El 'Turismo termal y bienestar' tiene como intención mejorar la salud o belleza. ¿Qué tipo de turismo busca mejorar las habilidades físicas?",
+                options: ["Turismo cultural", "Turismo gastronómico", "Turismo deportivo", "Turismo de negocios"],
+                correctAnswer: "Turismo deportivo",
+                rationale: "Su finalidad es 'practicar algún deporte'."
+            },
+            {
+                question: "Las 'Teorías de la motivación' turística son estudiadas en la sección de:",
+                options: ["Antecedentes del turismo", "Psicosociología del turismo", "La era de internet", "Pronóstico turístico"],
+                correctAnswer: "Psicosociología del turismo",
+                rationale: "El punto 2.6 se titula 'Concepto de motivación y teorías de la motivación'."
+            },
+            {
+                question: "El 'Turismo de naturaleza' incluye el turismo rural, la interpretación del medio y, específicamente, las:",
+                options: ["Peregrinaciones", "Actividades deportivas", "Festividades", "Baja sensibilidad al precio"],
+                correctAnswer: "Actividades deportivas",
+                rationale: "Incluye 'actividades deportivas, etc.'"
+            },
+            {
+                question: "La 'Ruta de la Seda' se menciona como ejemplo del motivo de viaje principal en la:",
+                options: ["Era de Internet", "Edad Antigua y Baja Edad Media", "Turismo de masas", "Grand Tour"],
+                correctAnswer: "Edad Antigua y Baja Edad Media",
+                rationale: "Se usa para ejemplificar el comercio en la Edad Antigua y Baja Edad Media."
+            },
+            {
+                question: "¿Qué tipo de turismo tiene como destino principal las costas y como finalidad el descanso?",
+                options: ["Turismo cultural", "Turismo de sol y playa", "Turismo de naturaleza", "Turismo de negocios"],
+                correctAnswer: "Turismo de sol y playa",
+                rationale: "Destino principal 'las costas y el buen clima'. Finalidad 'descansar'."
+            },
+            {
+                question: "El 'Buen servicio de habitaciones' es un requisito del turista de negocios junto con 'Servicio de lavandería y planchado' y:",
+                options: ["Vuelos largos con escalas", "Proximidad a la playa", "Servicio de secretaría", "Ocio nocturno"],
+                correctAnswer: "Servicio de secretaría",
+                rationale: "El soporte profesional (habitaciones, lavandería, secretaría) es clave para este viajero."
+            },
+            {
+                question: "El objetivo del 'Turismo de sol y playa' es descansar, mientras que el objetivo del 'Turismo termal y bienestar' es:",
+                options: ["Ocio nocturno", "Mejora de salud o belleza", "Comercio", "Interpretación del medio"],
+                correctAnswer: "Mejora de salud o belleza",
+                rationale: "Busca 'tratamientos de relajación y mejora de salud o belleza.'"
+            }
+        ];
+
+        // ===============================================
+        // Variables de Estado
+        // ===============================================
+        let quizQuestions = []; // Las 10 preguntas seleccionadas para el test
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let answered = false; // Bandera para saber si ya se respondió la pregunta actual
+
+        // Elementos del DOM
+        const qSection = document.getElementById('question-section');
+        const resultsSection = document.getElementById('results-section');
+        const qNumberSpan = document.getElementById('current-q-number');
+        const qText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const rationaleBox = document.getElementById('rationale-box');
+        const rationaleText = document.getElementById('rationale-text');
+        const nextButton = document.getElementById('next-button');
+
+        // ===============================================
+        // Funciones de Lógica del Test
+        // ===============================================
+
+        /**
+         * Selecciona 10 preguntas aleatorias y comienza el test.
+         */
+        function loadQuiz() {
+            // Mezcla el banco completo de preguntas
+            const shuffledBank = fullQuestionBank.sort(() => 0.5 - Math.random());
+
+            // Selecciona las primeras 10 (o menos si el banco es menor)
+            quizQuestions = shuffledBank.slice(0, 10);
+
+            if (quizQuestions.length === 0) {
+                qText.innerHTML = "Error: No hay preguntas en el banco.";
+                return;
+            }
+
+            currentQuestionIndex = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+
+            renderQuestion();
+        }
+
+        /**
+         * Renderiza la pregunta actual y sus opciones.
+         */
+        function renderQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                showResults();
+                return;
+            }
+
+            answered = false;
+            nextButton.classList.add('hidden');
+            rationaleBox.classList.add('hidden');
+            optionsContainer.innerHTML = ''; // Limpiar opciones anteriores
+
+            const currentQ = quizQuestions[currentQuestionIndex];
+
+            // Actualizar número y texto de la pregunta
+            qNumberSpan.textContent = currentQuestionIndex + 1;
+            qText.textContent = currentQ.question;
+
+            // Mezclar opciones para evitar que la correcta siempre esté en el mismo lugar
+            const shuffledOptions = currentQ.options.sort(() => 0.5 - Math.random());
+
+            // Crear botones de opciones
+            shuffledOptions.forEach(optionText => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.className = 'w-full text-left p-4 rounded-lg border-2 font-medium transition-all option-base shadow-sm';
+                button.onclick = () => checkAnswer(button, optionText, currentQ);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        /**
+         * Verifica si la respuesta es correcta y actualiza la UI.
+         * @param {HTMLElement} selectedButton - El botón que fue seleccionado.
+         * @param {string} selectedAnswer - El texto de la respuesta seleccionada.
+         * @param {object} currentQ - El objeto de la pregunta actual.
+         */
+        function checkAnswer(selectedButton, selectedAnswer, currentQ) {
+            if (answered) return;
+            answered = true;
+
+            const isCorrect = selectedAnswer === currentQ.correctAnswer;
+            const allOptionButtons = optionsContainer.querySelectorAll('button');
+
+            // Deshabilitar todos los botones de opción y aplicar clase 'disabled' para evitar hover
+            allOptionButtons.forEach(button => {
+                button.onclick = null; // Deshabilitar
+                button.classList.add('disabled');
+            });
+
+            if (isCorrect) {
+                correctCount++;
+                // Marcar la respuesta correcta en verde
+                selectedButton.classList.remove('option-base');
+                selectedButton.classList.add('option-correct', 'ring-4', 'ring-green-300');
+                rationaleBox.style.borderColor = '#059669'; // green-600
+                rationaleBox.classList.remove('option-incorrect');
+            } else {
+                incorrectCount++;
+                // Marcar la respuesta seleccionada en rojo
+                selectedButton.classList.remove('option-base');
+                selectedButton.classList.add('option-incorrect', 'ring-4', 'ring-red-300');
+                rationaleBox.style.borderColor = '#D93333'; // red-600
+                rationaleBox.classList.remove('option-correct');
+
+                // Encontrar y marcar la respuesta correcta en verde
+                allOptionButtons.forEach(button => {
+                    if (button.textContent === currentQ.correctAnswer) {
+                        button.classList.remove('option-base');
+                        button.classList.add('option-correct');
+                    }
+                });
+            }
+
+            // Mostrar la razón
+            rationaleText.textContent = currentQ.rationale;
+            rationaleBox.classList.remove('hidden');
+
+            // Mostrar el botón de Siguiente (o Finalizar)
+            nextButton.textContent = (currentQuestionIndex < quizQuestions.length - 1) ? 'Siguiente' : 'Ver Resultados';
+            nextButton.classList.remove('hidden');
+        }
+
+        /**
+         * Avanza a la siguiente pregunta.
+         */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+
+        /**
+         * Muestra la sección de resultados y calcula la nota final.
+         */
+        function showResults() {
+            qSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+
+            // Actualizar conteos
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+
+            // Calcular la nota final según la fórmula
+            // Nota = Aciertos - (Errores * 1/3)
+            const finalScore = correctCount - (incorrectCount * (1/3));
+
+            // Asegurar que la nota no sea negativa
+            const finalScoreCapped = Math.max(0, finalScore);
+
+            // Mostrar la nota con dos decimales
+            document.getElementById('final-score').textContent = finalScoreCapped.toFixed(2);
+        }
+
+        // Inicializar el quiz al cargar la página
+        window.onload = loadQuiz;
+    </script>
+
+</body>
+</html>
